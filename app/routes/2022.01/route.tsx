@@ -6,9 +6,9 @@ import { Form, Link, useActionData, useLoaderData, useNavigate } from "@remix-ru
 import { promises as fs } from "fs";
 import { getDirname } from "~/util";
 
-const dayNum = 0;
-const slug = '2023.00';
-const name = 'Day 00';
+const dayNum = 1;
+const slug = '2022.01';
+const name = 'Day 01';
 
 export async function loader({}: LoaderFunctionArgs) {
   const __dirname = getDirname();
@@ -79,6 +79,32 @@ export async function action({
     // Read the json data file data.json
     rawInput = (await fs.readFile(`${__dirname}/../app/routes/${slug}/inputs/${inputFileName}`, "utf8")) as string;
   }
+
+  // Given the rawInput, solve the problem!
+  const lines = rawInput.split('\n');
+  const elfPacks = [];
+  let currentPack = 0;
+  for (let lineNum = 0; lineNum < lines.length + 1; lineNum++) {
+    console.log('Line:', lineNum, lines.length);
+    if (lineNum == lines.length || lines[lineNum] === '') {
+      // empty line, move to next elf!
+      elfPacks.push({index: elfPacks.length, calories: currentPack});
+      currentPack = 0;
+    } else {
+      currentPack += Number(lines[lineNum]);
+    }
+  }
+  elfPacks.sort((a, b) => {
+    return b.calories - a.calories;
+  });
+
+  // Part 1:
+  output.push(`Most calories (Part 1): ${elfPacks[0].calories}\n`);
+
+  // Part 2:
+  output.push(`Top 3 sum: ${elfPacks[0].calories + elfPacks[1].calories + elfPacks[2].calories}`)
+
+  output.push(`Packs: ${JSON.stringify(elfPacks, null, '\t')}`);
 
   return json({ ok: true, rawInput, output: output.join('\n') });
 }

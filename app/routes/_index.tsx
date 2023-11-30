@@ -17,6 +17,10 @@ export default function Index() {
       <List>
         <List.Item><Link to="/2023/00">Day 00</Link></List.Item>
       </List>
+      <h1>AoC 2022</h1>
+      <List>
+        <List.Item><Link to="/2022/01">Day 01</Link></List.Item>
+      </List>
     </div>
   );
 }
