@@ -99,10 +99,12 @@ export async function action({
   });
 
   // Part 1:
-  output.push(`Most calories (Part 1): ${elfPacks[0].calories}\n`);
+  output.push(`Most calories (Part 1): ${elfPacks[0].calories}`);
+  output.push('');
 
   // Part 2:
-  output.push(`Top 3 sum: ${elfPacks[0].calories + elfPacks[1].calories + elfPacks[2].calories}`)
+  output.push(`Top 3 sum (Part 2): ${elfPacks[0].calories + elfPacks[1].calories + elfPacks[2].calories}`)
+  output.push('');
 
   output.push(`Packs: ${JSON.stringify(elfPacks, null, '\t')}`);
 
