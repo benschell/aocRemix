@@ -12,16 +12,6 @@ export const meta: MetaFunction = () => {
 
 export default function Index() {
   return (
-    <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }} className="container mx-auto">
-      <h1>AoC 2023</h1>
-      <List>
-        <List.Item><Link to="/2023/00">Day 00</Link></List.Item>
-        <List.Item><Link to="/2023/01">Day 01</Link></List.Item>
-      </List>
-      <h1>AoC 2022</h1>
-      <List>
-        <List.Item><Link to="/2022/01">Day 01</Link></List.Item>
-      </List>
-    </div>
+    <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }} className="container mx-auto"></div>
   );
 }

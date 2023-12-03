@@ -49,6 +49,15 @@ export default function App() {
                 arrowIcon={true}
                 inline
                 label={
+                  <span>2022</span>
+                }
+              >
+                <Dropdown.Item as={Link} to="/2022/01">Day 01</Dropdown.Item>
+              </Dropdown>
+              <Dropdown
+                arrowIcon={true}
+                inline
+                label={
                   <span>2023</span>
                 }
               >
