@@ -7,8 +7,9 @@ import { promises as fs } from "fs";
 import { getDirname } from "~/util";
 
 const dayNum = 0;
-const slug = '2023.00';
-const name = 'Day 00';
+const dayStr = `${dayNum}`.padStart(2, '0');
+const slug = `2023.${dayStr}`;
+const name = 'Day ${dayStr}';
 
 export async function loader({}: LoaderFunctionArgs) {
   const __dirname = getDirname();
