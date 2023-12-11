@@ -49,16 +49,16 @@ export default function Day00() {
           <div className="mb-2 block">
             <Label htmlFor="raw-input" value="Raw Text Input:" />
           </div>
-          <Textarea name="raw-input" placeholder="(optionally) provide raw input here" rows={4} />
+          <Textarea className="font-mono" name="raw-input" placeholder="(optionally) provide raw input here" rows={4} />
         </div>
         <Button type="submit">Submit</Button>
       </Form>
 
       <div  className="flex max-w-4xl flex-col gap-4 mt-10">
         <h2>Output:</h2>
-        <Textarea id="comment" value={actionData.output} readOnly rows={10} />
+        <Textarea className="font-mono" id="comment" value={actionData.output} readOnly rows={10} />
         <h3>From input:</h3>
-        <Textarea id="comment" value={actionData.rawInput} readOnly rows={10} />
+        <Textarea className="font-mono" id="comment" value={actionData.rawInput} readOnly rows={10} />
       </div>
     </div>
   );
