@@ -51,6 +51,18 @@ export default function Day00() {
           </div>
           <Textarea className="font-mono" name="raw-input" placeholder="(optionally) provide raw input here" rows={4} />
         </div>
+        <div>
+          <div className="mb-2 block">
+            <Label htmlFor="input-one" value="Input One:" />
+          </div>
+          <TextInput className="font-mono" name="input-one" placeholder="(optionally) provide 'inputOne' here" />
+        </div>
+        <div>
+          <div className="mb-2 block">
+            <Label htmlFor="input-one" value="Input Two:" />
+          </div>
+          <TextInput className="font-mono" name="input-two" placeholder="(optionally) provide 'inputTwo' here" />
+        </div>
         <Button type="submit">Submit</Button>
       </Form>
 
@@ -73,6 +85,8 @@ export async function action({
   const formData = await request.formData();
   const output: string[] = [];
   let rawInput = formData.get('raw-input') as string;
+  const inputOne = formData.get('input-one') as string; 
+  const inputTwo = formData.get('input-two') as string;
   if (!rawInput) {
     // Load the indicated file
     const inputFileName = formData.get('selected-input');
