@@ -179,6 +179,7 @@ export async function action({
     // Iterate over each map and figure out the rows/cols
     let rowLength: number = -1,
         colLength: number = -1,
+        map: number[][] = [],
         rows: number[] = [],
         colStrings: string[] = [],
         cols: number[] = [];
@@ -186,6 +187,10 @@ export async function action({
     for (let rowIdx = 0; rowIdx < lines.length; rowIdx++) {
       if (lines[rowIdx].length === 0) {
         continue;
+      }
+      map[rowIdx] = [];
+      for (let charIdx = 0; charIdx < lines[rowIdx].length; charIdx++) {
+        map[rowIdx][charIdx] = lines[rowIdx][charIdx] === '#' ? 1 : 0;
       }
       rowLength = lines[rowIdx].length;
       // output.push(lines[rowIdx]);
@@ -229,32 +234,79 @@ export async function action({
       }
     }
 
+
+
     if (!hasFoundReflection) {
       doOutput(8, `We did not find a reflection for this map! ${mapIdx}`);
     } else {
+      // Part 2: figure out a way to correct the error
+      doOutput(24, `Starting Part 2:`);
 
-      const flipCharAtBitAndTry = (rows: number[], rowIdx: number, charIdx: number, coordChar: string) => {
-        const row = rows[rowIdx];
-        const rowInBinary = (row >>> 0).toString(2);
-        const nextChar = rowInBinary[charIdx] === '1' ? '0' : '1';
-        rows[rowIdx] = parseInt(rowInBinary.substring(0, charIdx) +  nextChar + rowInBinary.substring(charIdx+1), 2);
-        doOutput(2, `Modified ${coordChar} row@${rowIdx} from ${(row>>>0).toString(2)} to ${(rows[rowIdx]>>>0).toString(2)}`);
+      enum CoordChar {
+        HORIZONTAL,
+        VERTICAL,
+      };
+      const rowsAndColsFromMap = () => {
+        const rows: number[] = [];
+        const cols: number[] = [];
+        const colStrings: string[] = [];
+        for (let rowIdx = 0; rowIdx < map.length; rowIdx++) {
+          let rowString = '';
+          for (let colIdx = 0; colIdx < map[rowIdx].length; colIdx++) {
+            if (!colStrings[colIdx]) {
+              colStrings[colIdx] = '';
+            }
+            rowString += map[rowIdx][colIdx] ? '1' : '0';
+            colStrings[colIdx] += map[rowIdx][colIdx] ? '1' : '0';
+          }
+          rows.push(parseInt(rowString, 2));
+        }
+        // output.push(' ');
+        // Now that we have all colStrings, let's parse and put into cols
+        for (let colIdx = 0; colIdx < colStrings.length; colIdx++) {
+          cols.push(parseInt(colStrings[colIdx].replaceAll('.', '0').replaceAll('#', '1'), 2));
+        }
+        return {
+          rows,
+          cols,
+        };
+      }
+      const flipCharAtBitAndTry = (x: number, y: number, coordChar: CoordChar) => {
+        console.log(`flipping ${x},${y} vs ${map[0].length},${map.length}`);
+        const priorValue = map[y][x];
+        output.push(`priorValue: ${priorValue}, newValue: ${priorValue === 1 ? 0 : 1}`);
+        map[y][x] = priorValue === 1 ? 0 : 1;
+        const { rows, cols } = rowsAndColsFromMap();
+        let hasFoundReflection = false,
+            newReflectionCoords = '';
 
-        // Try to find a new reflection
-        output.push(`Finding reflection in modified rows: \n${rows.map((row) => (row >>> 0).toString(2).padStart(rowLength, '0')).join('\n')}`);
-        const horizontalReflection = findReflection(rows);
-        if (horizontalReflection !== -1) {
-          doOutput(3, `Found a horizontalReflection: ${horizontalReflection} (now comparing to ${reflectionCoords})`);
-          partTwoSum += horizontalReflection * 100;
-          if (coordChar+horizontalReflection !== reflectionCoords) {
-            doOutput(3, `AND IT IS DIFFERENT THAN THE ORIGINAL REFLECTION (${reflectionCoords})`);
+        output.push(`P2Cols:\n${cols.map((col) => (col >>> 0).toString(2).padStart(colLength, '0')).join('\n')}`);
+        const verticalReflection = findReflection(cols);
+        const theseVReflectionCoords = 'v' + verticalReflection;
+        output.push(`Found P2verticalReflection: ${verticalReflection} vs. ${reflectionCoords}`);
+        if (verticalReflection !== -1 && theseVReflectionCoords !== reflectionCoords) {
+          map[y][x] = priorValue;
+          partTwoSum += verticalReflection;
+          output.push(`Returning true, there is a vertical reflection that doesn't match`);
+          return true;
+        }
+    
+        if (!hasFoundReflection) {
+          output.push(`P2Padding rows to ${rowLength}`);
+          output.push(`P2Rows:\n${rows.map((row) => (row >>> 0).toString(2).padStart(rowLength, '0')).join('\n')}`);
+          const horizontalReflection = findReflection(rows);
+          const theseHReflectionCoords = 'h' + horizontalReflection;
+          output.push(`Found P2horizontalReflection: ${theseHReflectionCoords} vs. ${reflectionCoords}`);
+          if (horizontalReflection !== -1 && theseHReflectionCoords !== reflectionCoords) {
+            map[y][x] = priorValue;
+            partTwoSum += 100 * horizontalReflection;
+            output.push(`Returning true, there is a horizontal reflection that doesn't match`);
             return true;
           }
         }
 
-        // Reset the row before we proceed
-        rows[rowIdx] = row;
-
+        map[y][x] = priorValue;
+        return false;
       };
       // We found the reflection. Let's look for pairs of numbers that could change.
       doOutput(1, `Checking for pairs inside cols: ${cols}`);
@@ -271,8 +323,8 @@ export async function action({
 
             output.push(`Finding reflection in modified cols: \n${cols.map((col) => (col >>> 0).toString(2).padStart(colLength, '0')).join('\n')}`);
             if (
-              flipCharAtBitAndTry(cols, colIdx, charIdx, 'v') ||
-              flipCharAtBitAndTry(cols, otherColIdx, charIdx, 'v')
+              flipCharAtBitAndTry(colIdx, charIdx, CoordChar.VERTICAL) ||
+              flipCharAtBitAndTry(otherColIdx, charIdx, CoordChar.VERTICAL)
             ) {
               shouldBreak = true;
               break;
@@ -297,8 +349,8 @@ export async function action({
               doOutput(1, `Comparing: ${rows[rowIdx]} vs. ${rows[otherRowIdx]}: ${xorAsString} -> ${hasOnlyOneBitDifferent} @ ${charIdx}`);
 
               if (
-                flipCharAtBitAndTry(rows, rowIdx, charIdx, 'h') ||
-                flipCharAtBitAndTry(rows, otherRowIdx, charIdx, 'h')
+                flipCharAtBitAndTry(charIdx, rowIdx, CoordChar.HORIZONTAL) ||
+                flipCharAtBitAndTry(charIdx, otherRowIdx, CoordChar.HORIZONTAL)
               ) {
                 shouldBreak = true;
                 break;
@@ -326,6 +378,7 @@ export async function action({
 
   // Part 2:
   // 119600 is too high
+  // 21234 is too low
 
   return json({ ok: true, rawInput, output: output.join('\n') });
 }
